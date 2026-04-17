@@ -195,4 +195,7 @@ Admins bypass cooldowns, channel restrictions, subscription checks, and blacklis
 
 Glorious was developed by **fr4ct4ldemo**.
 
+> ⚠️ **Disclaimer:**
+this source does not violate discord's terms of service. glorious operates within the boundaries set by discord's developer policy and community guidelines. we do not engage in any activity that promotes account abuse, unauthorized access, or any other conduct prohibited by discord.
+
 > ⚠️ **Do not remove or modify the credits.** Removing or altering the original credit will result in a **permanent blacklist** from updates, support, and future releases.
