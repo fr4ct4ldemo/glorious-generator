@@ -724,8 +724,8 @@ async def gen(
                 title=f"{EMOJIS['key']} Account Generated",
                 description=(
                     config["messages"]["altsent"] +
-                    f"\n\n{EMOJIS['warning']} **NOTICE:** Some accounts may not work and I am not responsible for any cause. "
-                    "Most stock accounts used here were cracked and not legally obtained."
+                    f"\n\n{EMOJIS['warning']} **NOTICE:** This account is personally owned and provided by the server."
+                    "Please do not change the password or account details."
                     f"\n||```yml\n{account}\n```||"
                 ),
                 color=NEON_GREEN,
