@@ -81,7 +81,7 @@ Edit `config.json` — this is the only file you need to touch:
 **3. Run the bot**
 
 ```bash
-python run.py
+python glorious.py
 ```
 
 ---
