@@ -18,7 +18,7 @@ A feature-rich Discord bot for distributing digital accounts to your server memb
 - **Per-Guild Config** — Every server gets its own isolated config, stock, and channels
 - **Auto Welcome** — Sends a greeting embed when the bot joins a new server
 - **Ticket System** — Built-in ticket support via `src/tickets.py`
-- **Web Dashboard** — Full Flask-based web dashboard with Discord OAuth, stock management, user management, and server settings
+- **Landing Page** — Public invite page with live stats pulled directly from the bot's database
 
 ---
 
