@@ -29,7 +29,7 @@ def get_managed_guilds(user_guilds):
 def login_page():
     if 'user' in session:
         return redirect(url_for('dashboard_bp.servers'))
-    return render_template('login.html')
+    return redirect(url_for('auth_bp.discord_login'))
 
 @auth_bp.route('/auth/discord')
 def discord_login():
