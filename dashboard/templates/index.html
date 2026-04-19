@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glorious — Discord Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #39FF14;
+    --green-dim: rgba(57,255,20,0.15);
+    --green-mid: rgba(57,255,20,0.4);
+    --bg: #050505;
+    --bg2: #0a0a0a;
+    --bg3: #111111;
+    --text: #e8e8e8;
+    --muted: #555;
+    --border: rgba(57,255,20,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+
+  /* CANVAS */
+  #grid-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+  }
+
+  /* NAVBAR */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(5,5,5,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: 28px;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-mid);
+    letter-spacing: 2px;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-ghost:hover {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 12px var(--green-dim);
+  }
+
+  .btn-primary {
+    background: var(--green);
+    border: 1px solid var(--green);
+    color: #000;
+    font-weight: 700;
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--green);
+    box-shadow: 0 0 24px var(--green-mid), inset 0 0 24px var(--green-dim);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+  }
+
+  .hero-tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.2s forwards;
+  }
+
+  .hero-tag::before, .hero-tag::after {
+    content: '—';
+    margin: 0 10px;
+    opacity: 0.5;
+  }
+
+  .hero-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(80px, 15vw, 180px);
+    color: var(--green);
+    line-height: 0.9;
+    text-shadow:
+      0 0 40px var(--green),
+      0 0 80px var(--green-mid),
+      0 0 120px rgba(57,255,20,0.1);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-sub {
+    font-size: clamp(13px, 2vw, 16px);
+    color: #888;
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-sub span {
+    color: var(--green);
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .hero-btns .btn { padding: 14px 32px; font-size: 13px; }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.2s forwards;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--green), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* STATS */
+  .stats {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(57,255,20,0.03);
+  }
+
+  .stat {
+    flex: 1;
+    max-width: 280px;
+    padding: 40px 24px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: rgba(57,255,20,0.05); }
+
+  .stat-num {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green-mid);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* SECTION */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-tag::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--green);
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 64px;
+    line-height: 1.1;
+  }
+
+  .section-title em {
+    color: var(--green);
+    font-style: normal;
+  }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .feature-card {
+    background: var(--bg2);
+    padding: 36px 32px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 0;
+    background: var(--green);
+    transition: height 0.3s ease;
+  }
+
+  .feature-card:hover::before { height: 100%; }
+  .feature-card:hover { background: var(--bg3); }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 20px;
+    display: block;
+    filter: grayscale(1) brightness(2);
+    transition: filter 0.3s;
+  }
+  .feature-card:hover .feature-icon { filter: none; }
+
+  .feature-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .feature-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.8;
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px;
+    position: relative;
+  }
+
+  .step {
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .step:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 30px var(--green-dim);
+  }
+
+  .step-num {
+    font-size: 64px;
+    font-weight: 800;
+    color: rgba(57,255,20,0.08);
+    position: absolute;
+    top: 16px; right: 24px;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .step:hover .step-num { color: rgba(57,255,20,0.15); }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.9;
+  }
+
+  /* CTA */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+    background: rgba(57,255,20,0.02);
+  }
+
+  .cta-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(48px, 8vw, 96px);
+    color: var(--green);
+    text-shadow: 0 0 40px var(--green-mid);
+    margin-bottom: 24px;
+  }
+
+  .cta-sub {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 48px;
+    letter-spacing: 1px;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: 20px;
+    color: var(--green);
+    opacity: 0.7;
+  }
+
+  .footer-copy {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--green); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.4; transform: scaleY(0.6); }
+  }
+
+  /* INTERSECTION OBSERVER ANIMATIONS */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-logo { font-size: 22px; }
+    section { padding: 60px 20px; }
+    .stats { flex-direction: column; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+    footer { flex-direction: column; align-items: flex-start; }
+    .cta-section { padding: 60px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="grid-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">Glorious</a>
+  <div class="nav-links">
+    <a href="#features" class="btn btn-ghost">Features</a>
+    <a href="https://dsc.gg/gloriousgg" target="_blank" class="btn btn-ghost">Reach Us</a>
+    <a href="https://discord.com/oauth2/authorize?client_id=1462701396481806469&permissions=274878295104&integration_type=0&scope=applications.commands+bot" target="_blank" class="btn btn-primary">+ Invite Bot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Discord Account Generator</div>
+  <h1 class="hero-title">Glorious</h1>
+  <p class="hero-sub">
+    Automated account generation for <span>Netflix</span>, <span>Spotify</span>, <span>Steam</span> and more.
+    <br>Trusted by <span>1,200+</span> servers worldwide.
+  </p>
+  <div class="hero-btns">
+    <a href="https://discord.com/oauth2/authorize?client_id=1462701396481806469&permissions=274878295104&integration_type=0&scope=applications.commands+bot" target="_blank" class="btn btn-primary">+ Add to Server</a>
+    <a href="#features" class="btn btn-ghost">View Features</a>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-num" data-key="servers">1200</span>
+    <span class="stat-label">Servers</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" data-key="users">8400</span>
+    <span class="stat-label">Users</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" data-key="generated">52000</span>
+    <span class="stat-label">Generated</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything you need to <em>scale</em></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Instant Generation</div>
+      <div class="feature-desc">Accounts delivered in seconds via automated DM. No waiting, no queues.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛡️</span>
+      <div class="feature-title">Auto-Restock</div>
+      <div class="feature-desc">Stock automatically refilled when low. Never run out of accounts.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔐</span>
+      <div class="feature-title">Secure Storage</div>
+      <div class="feature-desc">Accounts stored encrypted in database. Full audit logging.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Analytics Dashboard</div>
+      <div class="feature-desc">Track usage, revenue, and popular services in real-time.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <div class="feature-title">Role-Based Access</div>
+      <div class="feature-desc">Grant generation access via Discord roles. Full permission control.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💬</span>
+      <div class="feature-title">24/7 Support</div>
+      <div class="feature-desc">Dedicated support for setup, issues, and custom integrations.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-tag">How It Works</div>
+  <h2 class="section-title">Get started in <em>minutes</em></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Invite Bot</div>
+      <div class="step-desc">Add Glorious to your Discord server with proper permissions.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Configure</div>
+      <div class="step-desc">Set up generation channels, roles, and stock for each service.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Launch</div>
+      <div class="step-desc">Members use commands to generate accounts instantly via DM.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-title">Ready to start?</h2>
+  <p class="cta-sub">Join 1,200+ servers already using Glorious</p>
+  <p style="font-size: 12px; color: #555; margin-bottom: 24px; letter-spacing: 1px;">
+    reach us at <a href="https://dsc.gg/gloriousgg" target="_blank" 
+    style="color: #39FF14; text-decoration: none;">dsc.gg/gloriousgg</a>
+  </p>
+  <a href="https://discord.com/oauth2/authorize?client_id=1462701396481806469&permissions=274878295104&integration_type=0&scope=applications.commands+bot" target="_blank" class="btn btn-primary" style="padding: 18px 48px; font-size: 14px;">+ Add to Server</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Glorious</div>
+  <div class="footer-copy">© 2026 Glorious. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="#">Contact</a>
+    <a href="https://dsc.gg/gloriousgg" target="_blank">reach us</a>
+  </div>
+</footer>
+
+<script>
+// Grid canvas animation
+const canvas = document.getElementById('grid-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function drawGrid() {
+  ctx.clearRect(0, 0, width, height);
+  ctx.strokeStyle = 'rgba(57,255,20,0.1)';
+  ctx.lineWidth = 1;
+  
+  const spacing = 60;
+  for (let x = 0; x < width; x += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+  
+  requestAnimationFrame(drawGrid);
+}
+drawGrid();
+
+// Intersection Observer for reveal animations
+const revealElements = document.querySelectorAll('.reveal, section, .stat, .step, .feature-card');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+revealElements.forEach(el => observer.observe(el));
+
+// Count up animation
+function countUp(el) {
+  const target = parseInt(el.dataset.target) || 0;
+  const duration = 2000;
+  const start = performance.now();
+  
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+  
+  requestAnimationFrame(update);
+}
+
+// Load stats from API
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats')
+    const data = await res.json()
+    document.querySelector('[data-key="servers"]').dataset.target = data.servers
+    document.querySelector('[data-key="users"]').dataset.target = data.users
+    document.querySelector('[data-key="generated"]').dataset.target = data.generated
+    document.querySelectorAll('.stat-num').forEach(countUp)
+  } catch(e) {
+    document.querySelectorAll('.stat-num').forEach(countUp)
+  }
+}
+loadStats()
+</script>
+
+</body>
+</html>
